@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home</title>
+    <link rel="stylesheet" type="text/css" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome {{ user }}</h1>
+        <a href="/logout">Logout</a> | <a href="/create">Create Post</a>
+        <h2>Posts</h2>
+        {% for post in posts %}
+        <div class="post">
+            <form method="POST" action="/delete/{{ post.id }}" class="delete-form">
+                <button type="submit" class="delete-button">Delete</button>
+            </form>
+            <h3>{{ post.title }}</h3>
+            <p>{{ post.content }}</p>
+            <small>Written by {{ post.author }}</small><br>
+            {% if post.author == user %}
+            <a href="/edit/{{ post.id }}" class="edit-link">Edit</a>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
