@@ -1,41 +1,53 @@
 pipeline {
     agent any
 
+    environment {
+        IMAGE_NAME = 'forum-app' // Название Docker-образа
+    }
+
     stages {
         stage('Clone Repository') {
             steps {
-                git 'https://your-repo-url.git' 
+                git 'https://github.com/skw1gg/Forum'
             }
         }
+
+        stage('Check Docker Installation') {
+            steps {
+                sh 'docker --version'
+                sh 'docker-compose --version'
+            }
+        }
+
+        stage('Clean Up') {
+            steps {
+                sh 'docker-compose down || true'
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
-                script {
-                    sh 'docker-compose build'
-                }
+                sh 'docker-compose build'
             }
         }
+
         stage('Run Tests') {
             steps {
-                script {
-                    echo 'Running tests...'
-                }
+                echo 'Running tests inside Docker...'
+                sh 'docker-compose run --rm web pytest --maxfail=1 --disable-warnings'
             }
         }
+
         stage('Deploy') {
             steps {
-                script {
-                    sh 'docker-compose up -d'
-                }
+                sh 'docker-compose up -d'
             }
         }
     }
 
     post {
         always {
-            script {
-                sh 'docker-compose down'
-            }
+            sh 'docker-compose down'
         }
     }
 }
- 
