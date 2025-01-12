@@ -10,16 +10,16 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                bat 'docker build -t forum-app -f python/Dockerfile .'
+                bat 'docker build -t forum-app -f Dockerfile .'
             }
         }
 
         stage('Run Tests') {
             steps {
-                withEnv(["PYTHONPATH=${WORKSPACE}\\python"]) {
+                withEnv(["PYTHONPATH=${WORKSPACE}"]) {
                     bat '''
                     powershell -Command "if (!(Test-Path reports)) { New-Item -ItemType Directory -Path reports }"
-                    pytest python/tests/ --junitxml=reports/test-results.xml
+                    pytest tests/ --junitxml=reports/test-results.xml
                     '''
                 }
             }
@@ -27,7 +27,7 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                bat 'docker-compose -f python/docker-compose.yml up -d'
+                bat 'docker-compose up -d'
             }
         }
     }
