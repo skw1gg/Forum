@@ -1,53 +1,41 @@
 pipeline {
     agent any
 
-    environment {
-        IMAGE_NAME = 'forum-app' // Название Docker-образа
-    }
-
     stages {
         stage('Clone Repository') {
             steps {
-                git 'https://github.com/skw1gg/Forum'
-            }
-        }
-
-        stage('Check Docker Installation') {
-            steps {
-                sh 'docker --version'
-                sh 'docker-compose --version'
-            }
-        }
-
-        stage('Clean Up') {
-            steps {
-                sh 'docker-compose down || true'
+                git branch: 'master', url: 'https://github.com/skw1gg/Forum.git', credentialsId: 'git-credentials-id'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker-compose build'
+                bat 'docker build -t forum-app .'
             }
         }
 
         stage('Run Tests') {
             steps {
-                echo 'Running tests inside Docker...'
-                sh 'docker-compose run --rm web pytest --maxfail=1 --disable-warnings'
+                bat 'pytest tests/'
             }
         }
 
         stage('Deploy') {
             steps {
-                sh 'docker-compose up -d'
+                bat 'docker-compose up -d'
             }
         }
     }
 
     post {
         always {
-            sh 'docker-compose down'
+            archiveArtifacts artifacts: '**/logs/*.log', allowEmptyArchive: true
+            junit '**/reports/*.xml'
+        }
+        failure {
+            mail to: 'your-email@example.com',
+                 subject: "Build failed: ${env.JOB_NAME} - ${env.BUILD_NUMBER}",
+                 body: "Check Jenkins for details."
         }
     }
 }
