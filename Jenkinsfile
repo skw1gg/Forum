@@ -1,41 +1,59 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_REGISTRY = 'mydockerhub'
+        DOCKER_IMAGE = 'forum-app'
+    }
+
     stages {
-        stage('Clone Repository') {
+
+        stage('Checkout') {
             steps {
-                git branch: 'master', url: 'https://github.com/skw1gg/Forum.git', credentialsId: 'git-credentials-id'
+                git branch: 'master', url: 'https://github.com/your-repo/Forum.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                bat 'docker build -t forum-app -f Dockerfile .'
+                script {
+                    sh 'docker-compose down'
+                    sh 'docker-compose build'
+                }
             }
         }
 
         stage('Run Tests') {
             steps {
-                withEnv(["PYTHONPATH=${WORKSPACE}"]) {
-                    bat '''
-                    powershell -Command "if (!(Test-Path reports)) { New-Item -ItemType Directory -Path reports }"
-                    pytest tests/ --junitxml=reports/test-results.xml
-                    '''
+                script {
+                    sh 'docker-compose up -d'
+                    sh 'docker exec python-web pytest tests/'
                 }
             }
         }
 
         stage('Deploy') {
             steps {
-                bat 'docker-compose up -d'
+                script {
+                    sh 'docker-compose up -d --remove-orphans'
+                }
             }
         }
+
     }
 
     post {
         always {
-            archiveArtifacts artifacts: '**/logs/*.log', allowEmptyArchive: true
-            junit '**/reports/test-results.xml'
+            archiveArtifacts artifacts: 'reports/**', allowEmptyArchive: true
+            junit 'reports/test-results.xml'
+        }
+
+        failure {
+            echo "Pipeline failed!"
+        }
+
+        success {
+            echo "Pipeline succeeded!"
         }
     }
 }
