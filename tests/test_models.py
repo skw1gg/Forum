@@ -1,17 +1,38 @@
-def test_user_model(client):
-    user = User(username="testuser", password="hashedpassword")
-    db.session.add(user)
-    db.session.commit()
+import pytest
+from forum_app import app, db, User, Post
 
-    queried_user = User.query.filter_by(username="testuser").first()
-    assert queried_user is not None
-    assert queried_user.username == "testuser"
+@pytest.fixture
+def client():
+    app.config['TESTING'] = True
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+    with app.test_client() as client:
+        with app.app_context():
+            db.create_all()  # Создаём таблицы перед каждым тестом
+        yield client
+
+        # Удаляем данные и таблицы после каждого теста
+        with app.app_context():
+            db.session.remove()
+            db.drop_all()
+
+def test_user_model(client):
+    with app.app_context():  # Добавляем контекст приложения
+        user = User(username="testuser", password="hashedpassword")
+        db.session.add(user)
+        db.session.commit()
+
+        queried_user = User.query.filter_by(username="testuser").first()
+        assert queried_user is not None
+        assert queried_user.username == "testuser"
 
 def test_post_model(client):
-    post = Post(title="Test Post", content="Test content", author="testuser")
-    db.session.add(post)
-    db.session.commit()
+    with app.app_context():  # Добавляем контекст приложения
+        post = Post(title="Test Post", content="Test content", author="testuser")
+        db.session.add(post)
+        db.session.commit()
 
-    queried_post = Post.query.filter_by(title="Test Post").first()
-    assert queried_post is not None
-    assert queried_post.content == "Test content"
+        queried_post = Post.query.filter_by(title="Test Post").first()
+        assert queried_post is not None
+        assert queried_post.content == "Test content"
