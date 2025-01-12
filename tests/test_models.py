@@ -9,16 +9,16 @@ def client():
 
     with app.test_client() as client:
         with app.app_context():
-            db.create_all()  # Создаём таблицы перед каждым тестом
+            db.create_all()  
         yield client
 
-        # Удаляем данные и таблицы после каждого теста
+        
         with app.app_context():
             db.session.remove()
             db.drop_all()
 
 def test_user_model(client):
-    with app.app_context():  # Добавляем контекст приложения
+    with app.app_context():  
         user = User(username="testuser", password="hashedpassword")
         db.session.add(user)
         db.session.commit()
@@ -28,7 +28,7 @@ def test_user_model(client):
         assert queried_user.username == "testuser"
 
 def test_post_model(client):
-    with app.app_context():  # Добавляем контекст приложения
+    with app.app_context():  
         post = Post(title="Test Post", content="Test content", author="testuser")
         db.session.add(post)
         db.session.commit()

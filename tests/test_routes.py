@@ -4,18 +4,18 @@ from forum_app import app, db, User, Post
 @pytest.fixture
 def client():
     app.config['TESTING'] = True
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'  # SQLite для тестов
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'  
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
     with app.test_client() as client:
         with app.app_context():
-            db.create_all()  # Создаем таблицы
+            db.create_all()  
         yield client
 
 
 def test_home_redirect(client):
     response = client.get('/')
-    assert response.status_code == 302  # Перенаправление на логин
+    assert response.status_code == 302  
 
 def test_register_route(client):
     response = client.get('/register')
@@ -29,4 +29,4 @@ def test_login_route(client):
 
 def test_create_post_redirect(client):
     response = client.get('/create')
-    assert response.status_code == 302  # Перенаправление на логин, если пользователь не авторизован
+    assert response.status_code == 302  

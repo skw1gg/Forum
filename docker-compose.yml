@@ -4,7 +4,7 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - SQLALCHEMY_DATABASE_URI=postgresql://postgres:timur123@db:5436/forum_db
+      - SQLALCHEMY_DATABASE_URI=postgresql://postgres:timur123@db:5437/forum_db
     depends_on:
       - db
 
@@ -15,4 +15,4 @@ services:
       POSTGRES_PASSWORD: timur123
       POSTGRES_DB: forum_db
     ports:
-      - "5436:5432"
+      - "5437:5432"
