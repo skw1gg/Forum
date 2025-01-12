@@ -10,15 +10,15 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: 'master', url: 'https://github.com/skw1gg/Forum.git'
+                git branch: 'master', url: 'https://github.com/skw1gg/Forum.git', credentialsId: 'git-credentials-id'
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh 'docker-compose down'
-                    sh 'docker-compose build'
+                    bat 'docker-compose down'
+                    bat 'docker-compose build'
                 }
             }
         }
@@ -26,8 +26,8 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
-                    sh 'docker-compose up -d'
-                    sh 'docker exec python-web pytest tests/'
+                    bat 'docker-compose up -d'
+                    bat 'docker exec python-web pytest tests/'
                 }
             }
         }
@@ -35,7 +35,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    sh 'docker-compose up -d --remove-orphans'
+                    bat 'docker-compose up -d --remove-orphans'
                 }
             }
         }
