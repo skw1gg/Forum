@@ -15,4 +15,4 @@ services:
       POSTGRES_PASSWORD: timur123
       POSTGRES_DB: forum_db
     ports:
-      - "5433:5432"
+      - "5434:5432"
