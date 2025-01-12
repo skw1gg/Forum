@@ -7,7 +7,7 @@ app.secret_key = 'your_secret_key'
 
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:timur123@localhost:5434/forum_db"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:timur123@localhost:5435/forum_db"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
