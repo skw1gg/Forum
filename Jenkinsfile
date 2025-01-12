@@ -16,12 +16,11 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                // Добавление PYTHONPATH для поиска модуля forum_app
-                withEnv(["PYTHONPATH=${WORKSPACE}"]) {
-                    // Генерация JUnit-отчета для Jenkins
+                // Указываем PYTHONPATH для поиска модуля forum_app
+                withEnv(["PYTHONPATH=${WORKSPACE}\\python"]) {
                     bat '''
                     mkdir reports
-                    pytest tests/ --junitxml=reports/test-results.xml
+                    pytest python/tests/ --junitxml=reports/test-results.xml
                     '''
                 }
             }
@@ -36,15 +35,15 @@ pipeline {
 
     post {
         always {
-            // Архивация логов и JUnit-отчета
+            // Архивация логов и отчетов
             archiveArtifacts artifacts: '**/logs/*.log', allowEmptyArchive: true
             junit '**/reports/test-results.xml'
         }
         failure {
-            // Уведомление о неудачной сборке (можно закомментировать, если SMTP не настроен)
-            mail to: 'your-email@example.com',
-                 subject: "Build failed: ${env.JOB_NAME} - ${env.BUILD_NUMBER}",
-                 body: "Check Jenkins for details."
+            // Отключите, если SMTP не настроен
+            // mail to: 'your-email@example.com',
+            //      subject: "Build failed: ${env.JOB_NAME} - ${env.BUILD_NUMBER}",
+            //      body: "Check Jenkins for details."
         }
     }
 }
