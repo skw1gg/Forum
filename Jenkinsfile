@@ -10,7 +10,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                bat 'docker build -t forum-app .'
+                bat 'docker build -t forum-app -f python/Dockerfile .'
             }
         }
 
@@ -18,7 +18,7 @@ pipeline {
             steps {
                 withEnv(["PYTHONPATH=${WORKSPACE}\\python"]) {
                     bat '''
-                    mkdir reports
+                    powershell -Command "if (!(Test-Path reports)) { New-Item -ItemType Directory -Path reports }"
                     pytest python/tests/ --junitxml=reports/test-results.xml
                     '''
                 }
@@ -27,7 +27,7 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                bat 'docker-compose up -d'
+                bat 'docker-compose -f python/docker-compose.yml up -d'
             }
         }
     }
@@ -37,11 +37,5 @@ pipeline {
             archiveArtifacts artifacts: '**/logs/*.log', allowEmptyArchive: true
             junit '**/reports/test-results.xml'
         }
-        // Удалите или закомментируйте блок failure
-        // failure {
-        //     mail to: 'your-email@example.com',
-        //          subject: "Build failed: ${env.JOB_NAME} - ${env.BUILD_NUMBER}",
-        //          body: "Check Jenkins for details."
-        // }
     }
 }
